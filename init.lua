@@ -43,6 +43,7 @@ P.S. You can delete this when you're done too. It's your config now :)
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+vim.wo.relativenumber = true
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
@@ -282,7 +283,7 @@ require('lazy').setup({
   --    Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {})
 
 -- [[ Setting options ]]
@@ -341,6 +342,30 @@ vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous dia
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+-- Andras's keymaps
+--
+vim.keymap.set('n', '<leader>ti', function ()
+  vim.lsp.inlay_hint.enable(0, not vim.lsp.inlay_hint.is_enabled(nil))
+end 
+  , {desc = 'Toggle inlay hints' }) 
+
+vim.keymap.set('n', '<leader>k', ':bp<bar>sp<bar>bn<bar>bd<CR>',{ desc = 'Close current buffer' })
+  -- vim.keymap.set('n', '<leader>k', vim.cmd.bdelete, { desc = 'Close current buffer' })
+
+  vim.keymap.set('n','<leader>o',
+    function()
+      if vim.bo.filetype == "neo-tree" then
+        vim.cmd.wincmd "p"
+      else
+        -- vim.cmd.Neotree "focus"
+        vim.cmd.Neotree "focus"
+      end
+    end,
+    {
+    desc = "Toggle Explorer Focus",
+  })
+
+
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
@@ -510,6 +535,9 @@ end, 0)
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
 local on_attach = function(_, bufnr)
+
+  vim.lsp.inlay_hint.enable(0,true)
+
   -- NOTE: Remember that lua is a real programming language, and as such it is possible
   -- to define small helper and utility functions so you don't have to repeat yourself
   -- many times.
@@ -522,6 +550,7 @@ local on_attach = function(_, bufnr)
     end
 
     vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
+
   end
 
   nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
@@ -586,6 +615,8 @@ require('mason-lspconfig').setup()
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
 local servers = {
+      clangd = {},
+      sourcekit = {},
   -- clangd = {},
   -- gopls = {},
   -- pyright = {},
@@ -612,6 +643,7 @@ capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 -- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
+
 
 mason_lspconfig.setup {
   ensure_installed = vim.tbl_keys(servers),
