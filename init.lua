@@ -617,9 +617,13 @@ require('mason-lspconfig').setup()
 --  define the property 'filetypes' to the map in question.
 local servers = {
       clangd = {},
-  -- clangd = {},
-  -- gopls = {},
-  -- pyright = {},
+      sourcekit = {
+         root_dir = require('lspconfig').util.root_pattern(
+           '.git',
+           'Package.swift',
+           'compile_commands.json'
+         ),
+       },
     taplo = {
           keys = {
             {
