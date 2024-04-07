@@ -33,8 +33,6 @@ return {
       },
     },
   },
-  
-
   -- Markdown preview
   {
     "iamcco/markdown-preview.nvim",
@@ -54,7 +52,6 @@ return {
       vim.cmd([[do FileType]])
     end,
   },
-
   {
     "lukas-reineke/headlines.nvim",
     opts = function()
