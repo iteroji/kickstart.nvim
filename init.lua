@@ -1,6 +1,4 @@
 --[[
---
---/
 
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
@@ -92,7 +90,7 @@ require('lazy').setup({
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim',       opts = {} },
+      { 'j-hui/fidget.nvim', opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
@@ -128,7 +126,7 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim',  opts = {} },
+  { 'folke/which-key.nvim', opts = {} },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -273,11 +271,11 @@ require('lazy').setup({
     },
     build = ':TSUpdate',
   },
-
+  
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
-  require 'kickstart.plugins.autoformat',
+  -- require 'kickstart.plugins.autoformat',
   -- require 'kickstart.plugins.debug',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
@@ -347,25 +345,25 @@ vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open float
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
 -- Andras's keymaps
 --
-vim.keymap.set('n', '<leader>j', '*``cgn', { desc = 'Replace under cursor' })
-vim.keymap.set('n', '<leader>ti', function()
+vim.keymap.set('n', '<leader>j', '*``cgn', {desc = 'Replace under cursor'})
+vim.keymap.set('n', '<leader>ti', function ()
   vim.lsp.inlay_hint.enable(0, not vim.lsp.inlay_hint.is_enabled(nil))
-end
-, { desc = 'Toggle inlay hints' })
+end 
+  , {desc = 'Toggle inlay hints' }) 
 
-vim.keymap.set('n', '<leader>k', ':bp<bar>sp<bar>bn<bar>bd<CR>', { desc = 'Close current buffer' })
--- vim.keymap.set('n', '<leader>k', vim.cmd.bdelete, { desc = 'Close current buffer' })
+vim.keymap.set('n', '<leader>k', ':bp<bar>sp<bar>bn<bar>bd<CR>',{ desc = 'Close current buffer' })
+  -- vim.keymap.set('n', '<leader>k', vim.cmd.bdelete, { desc = 'Close current buffer' })
 
-vim.keymap.set('n', '<leader>o',
-  function()
-    if vim.bo.filetype == "neo-tree" then
-      vim.cmd.wincmd "p"
-    else
-      -- vim.cmd.Neotree "focus"
-      vim.cmd.Neotree "focus"
-    end
-  end,
-  {
+  vim.keymap.set('n','<leader>o',
+    function()
+      if vim.bo.filetype == "neo-tree" then
+        vim.cmd.wincmd "p"
+      else
+        -- vim.cmd.Neotree "focus"
+        vim.cmd.Neotree "focus"
+      end
+    end,
+    {
     desc = "Toggle Explorer Focus",
   })
 
@@ -538,16 +536,9 @@ end, 0)
 
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
-local on_attach = function(client, bufnr)
-  print("LSP attached")
+local on_attach = function(_, bufnr)
 
-
-  vim.api.nvim_create_autocmd("BufWritePre", {
-    buffer = bufnr,
-    callback = function()
-      vim.lsp.buf.format({ async = true })
-    end,
-  })
+  vim.lsp.inlay_hint.enable(0,true)
 
   -- NOTE: Remember that lua is a real programming language, and as such it is possible
   -- to define small helper and utility functions so you don't have to repeat yourself
@@ -561,12 +552,12 @@ local on_attach = function(client, bufnr)
     end
 
     vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
+
   end
 
   nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
   nmap('<leader>ca', function()
     vim.lsp.buf.code_action { context = { only = { 'quickfix', 'refactor', 'source' } } }
-    print("setting keymap for code actions")
   end, '[C]ode [A]ction')
 
   nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
@@ -627,23 +618,25 @@ require('mason-lspconfig').setup()
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
 local servers = {
-  taplo = {
-    keys = {
-      {
-        "K",
-        function()
-          if vim.fn.expand("%:t") == "Cargo.toml" and require("crates").popup_available() then
-            require("crates").show_popup()
-          else
-            vim.lsp.buf.hover()
-          end
-        end,
-        desc = "Show Crate Documentation",
-      },
-    },
-  },
-
-  marksman = {},
+      clangd = {},
+      sourcekit = {},
+    taplo = {
+          keys = {
+            {
+              "K",
+              function()
+                if vim.fn.expand("%:t") == "Cargo.toml" and require("crates").popup_available() then
+                  require("crates").show_popup()
+                else
+                  vim.lsp.buf.hover()
+                end
+              end,
+              desc = "Show Crate Documentation",
+            },
+          },
+        },
+      
+    marksman = {}, 
   -- tsserver = {},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
 
@@ -683,13 +676,6 @@ mason_lspconfig.setup_handlers {
   end,
 }
 
-require('lspconfig').sourcekit.setup {
-  cmd = { "sourcekit-lsp" },
-  on_attach = on_attach,
-  capabilities = capabilities,
-  filetypes = { "swift" },
-  root_dir = require 'lspconfig'.util.root_pattern("Package.swift", ".git"),
-}
 -- [[ Configure nvim-cmp ]]
 -- See `:help cmp`
 local cmp = require 'cmp'
@@ -742,28 +728,29 @@ cmp.setup {
   },
 }
 local highlight = {
-  "RainbowRed",
-  "RainbowYellow",
-  "RainbowBlue",
-  "RainbowOrange",
-  "RainbowGreen",
-  "RainbowViolet",
-  "RainbowCyan",
+    "RainbowRed",
+    "RainbowYellow",
+    "RainbowBlue",
+    "RainbowOrange",
+    "RainbowGreen",
+    "RainbowViolet",
+    "RainbowCyan",
 }
 
 local hooks = require "ibl.hooks"
 -- create the highlight groups in the highlight setup hook, so they are reset
 -- every time the colorscheme changes
 hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
-  vim.api.nvim_set_hl(0, "RainbowRed", { fg = "#E06C75" })
-  vim.api.nvim_set_hl(0, "RainbowYellow", { fg = "#E5C07B" })
-  vim.api.nvim_set_hl(0, "RainbowBlue", { fg = "#61AFEF" })
-  vim.api.nvim_set_hl(0, "RainbowOrange", { fg = "#D19A66" })
-  vim.api.nvim_set_hl(0, "RainbowGreen", { fg = "#98C379" })
-  vim.api.nvim_set_hl(0, "RainbowViolet", { fg = "#C678DD" })
-  vim.api.nvim_set_hl(0, "RainbowCyan", { fg = "#56B6C2" })
+    vim.api.nvim_set_hl(0, "RainbowRed", { fg = "#E06C75" })
+    vim.api.nvim_set_hl(0, "RainbowYellow", { fg = "#E5C07B" })
+    vim.api.nvim_set_hl(0, "RainbowBlue", { fg = "#61AFEF" })
+    vim.api.nvim_set_hl(0, "RainbowOrange", { fg = "#D19A66" })
+    vim.api.nvim_set_hl(0, "RainbowGreen", { fg = "#98C379" })
+    vim.api.nvim_set_hl(0, "RainbowViolet", { fg = "#C678DD" })
+    vim.api.nvim_set_hl(0, "RainbowCyan", { fg = "#56B6C2" })
 end)
 
-require("ibl").setup { whitespace = { highlight = { "Whitespace", "NonText" } },
-  indent = { highlight = highlight,
-    char = "│" } }
+  require("ibl").setup {  whitespace = { highlight = { "Whitespace", "NonText" } },
+                          indent = { highlight = highlight,
+                                   char = "│"}}
+
